@@ -12,4 +12,6 @@ Edit this part in <ins>**last line of dbManager.php**</ins> according to ur mysq
     $dbManager = new dbManager($hostname, $username, $password, $dbName);
 ```
 
-
+[Side bar template to choose from (check for 4.1.3 bootstrap version)](https://freefrontend.com/bootstrap-sidebars/)
+or
+[Create navigation bar using bootstrap](https://getbootstrap.com/docs/4.1/components/navbar/)

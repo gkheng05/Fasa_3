@@ -2,7 +2,7 @@
 
 ## How to edit
 
-Edit this part in dbManager.php according to ur mysql database
+Edit this part in **Last Line of dbManager.php** according to ur mysql database
 
 ```
     $hostname = "127.0.0.1"; //default if using xampp

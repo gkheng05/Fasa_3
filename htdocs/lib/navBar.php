@@ -45,7 +45,7 @@
             <?php } ?>
             <?php if ($dbManager->isAdmin()) { ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="/pengguna.php">Pengguna</a>
+                    <a class="nav-link" href="/pengguna.php">Pengurusan Pengguna</a>
                 </li>
             <?php } ?>
         </ul>

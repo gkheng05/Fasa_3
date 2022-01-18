@@ -38,6 +38,7 @@ class dbManager
      */
     private mysqli $dbConn;
 
+
     public function __construct($dbHost, $username, $password, $dbName)
     {
         $this->dbHost = $dbHost;
@@ -55,7 +56,6 @@ class dbManager
     {
         //init database session
         $this->dbConn = new mysqli($this->dbHost, $this->username, $this->password, $this->dbName);
-
         if ($this->dbConn->connect_error) {
             return false;
         }
@@ -207,7 +207,7 @@ class dbManager
      * @param int $role 0 = all roles, 1 = peserta, 2 = hakim, 6 = admin
      * @return array
      */
-    public function searchBy(string $username, int $role = 0)
+    public function searchBy(string $username = "", int $role = 0)
     {
         $queryStr = "SELECT * FROM `allPengguna` WHERE nama LIKE '$username%' AND ($role = 0 OR peranan = $role)";
 
@@ -270,6 +270,135 @@ class dbManager
         }
     }
 
+    public function importMarkah()
+    {
+        $csv = "id,bahagian A,bahagian B,bahagian C,jumlah Markah\n";
+        $allRes = $this->getAllTempatPeserta();
+
+        foreach ($allRes as $res)
+            $csv .= $res["id"] . "," . $res["a"] . "," . $res["b"] . "," . $res["c"] . "," . $res["jumlah"] . "\n";
+
+        return $csv;
+    }
+
+    public function exportMarkah()
+    {
+        //$file = fopen("php://temp","rw+");
+        $file = fopen("php://output", "rw+");
+        fputcsv($file, array("tempat peserta", "nama peserta", "bahagian A", "bahagian B", "bahagian C", "jumlah Markah"));
+        $allRes = $this->getAllTempatPeserta();
+        $tempat = 1;
+        foreach ($allRes as $res) {
+            fputcsv($file, array($tempat, $res["nama"], $res["a"], $res["b"], $res["c"], $res["jumlah"]));
+            $tempat++;
+        }
+
+        fclose($file);
+        /*
+        $len = ftell($file);
+        rewind($file);
+        $csv = fread($file, $len);
+        fclose($file);
+        return $csv;
+        */
+    }
+
+    public function exportPeserta()
+    {
+        $result = $this->searchBy("", 1);
+        $file = fopen("php://output", "rw+");
+        fputcsv($file, array("nama", "emel", "kata laluan", "telefon", "noic", "alamat"));
+        foreach ($result as $res)
+            fputcsv($file, array($res["nama"], $res["emel"], "", $res["telefonPeserta"], $res["noicPeserta"], $res["alamatPeserta"]));
+
+        fclose($file);
+    }
+
+    public function exportHakimAtauAdmin(bool $isAdmin)
+    {
+        $result = $this->searchBy("", ($isAdmin) ? 6 : 2);
+        $file = fopen("php://output", "rw+");
+        fputcsv($file, array("nama", "emel", "kata laluan"));
+        foreach ($result as $res)
+            fputcsv($file, array($res["nama"], $res["emel"], ""));
+
+        fclose($file);
+    }
+
+    public function importByCSV(string $fileName, int $peranan)
+    {
+        $file = fopen($fileName, "r");
+        while (($data = fgetcsv($file, 0)) !== false) {
+            if (!empty($data[0]) && !empty($data[1]) && !empty($data[2]))
+                $result[] = $data;
+        }
+        fclose($file);
+
+        if ($peranan !== 1 && $peranan !== 2 && $peranan !== 6) {
+            return false;
+        }
+
+        if (!isset($result)) {
+            //echo "error fgetcsv";
+            return false;
+        }
+
+        if (!($result[0][0] == "nama" && $result[0][1] == "emel" && $result[0][2] == "kata laluan")) {
+            //echo var_dump($result[0]);
+            //echo "error csv";
+            return false;
+        }
+
+        array_shift($result);
+
+        if (empty($result)) {
+            return false;
+        }
+        try {
+
+            $this->dbConn->begin_transaction();
+            $this->dbConn->query("DELETE FROM `PENGGUNA` WHERE perananPengguna = $peranan");
+
+            foreach ($result as $res) {
+                $passwd = $res[2];
+                $this->hashPassword($passwd);
+                $allPengguna[] = "('" . $res[1] . "', '" . $passwd . "', " . $peranan . ")";
+            }
+
+            $flatAP = implode(", ", $allPengguna);
+            $this->dbConn->query("INSERT INTO `PENGGUNA`(`emelPengguna`,`kataLaluanPengguna`,`perananPengguna`) VALUES $flatAP");
+
+            $minID = $this->dbConn->query("SELECT MAX(`idPengguna`) FROM `Pengguna`")->fetch_array()[0] - count($result);
+            if ($peranan == 1) {
+                foreach ($result as $res) {
+                    $minID++;
+                    $allPeserta[] = "(" . $minID . " ,'" . $res[0] . "' ,'" . $res[3] . "' ,'" . $res[4] . "' ,'" . $res[5] . "')";
+                    $allIDMarkah[] = "($minID)";
+                }
+
+                $this->dbConn->query("INSERT INTO `markah`(`idMarkah`) VALUES ". implode(", ", $allIDMarkah));
+
+                $flatten = implode(", ", $allPeserta);
+                $queryStr = "INSERT INTO `peserta`(`idPeserta`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES $flatten";
+            } else if ($peranan == 2 || $peranan == 6) {
+                foreach ($result as $res) {
+                    $minID++;
+                    $allPeserta[] = "(" . $minID . " ,'" . $res[0] . "')";
+                }
+
+                $flatten = implode(", ", $allPeserta);
+                $queryStr = (($peranan == 2) ? "INSERT INTO `HAKIM`(`idHakim`, `namaHakim`) VALUES " : "INSERT INTO `ADMIN`(`idAdmin`, `namaAdmin`) VALUES ") . $flatten;
+            }
+
+            $this->dbConn->query($queryStr);
+            $this->dbConn->commit();
+        } catch (Exception $e) {
+            $this->dbConn->rollback();
+            return false;
+        }
+        return true;
+    }
+
     /**
      * check if current session is Admin
      * 
@@ -312,54 +441,6 @@ class dbManager
         }
         redirect("login.php");
         return false;
-    }
-
-    public function editPengguna(int $id, string $emel, string $kataLaluan = null)
-    {
-        if (!$this->checkValidString(func_get_args()))
-            return false;
-        
-        $editKataLaluan = "";
-        if($kataLaluan != null)
-        {
-            $this->hashPassword($kataLaluan);
-            $editKataLaluan = ", `kataLaluanPengguna` = '$kataLaluan'";
-        }
-        $queryStr = "UPDATE `PENGGUNA` SET `emelPengguna` = '$emel'$editKataLaluan WHERE `PENGGUNA`.`idPengguna` = $id";
-
-        return $this->dbConn->query($queryStr);
-    }
-
-    public function editHakim(int $id, string $nama)
-    {
-
-        if (!$this->checkValidString(func_get_args()))
-            return false;
-
-        $queryStr = "UPDATE `HAKIM` SET `namaHakim` = '$nama' WHERE `HAKIM`.`idHakim` = $id";
-
-        return $this->dbConn->query($queryStr);
-    }
-
-    public function editAdmin(int $id, string $nama)
-    {
-        if (!$this->checkValidString(func_get_args()))
-            return false;
-
-        $queryStr = "UPDATE `ADMIN` SET `namaAdmin` = '$nama' WHERE `ADMIN`.`idAdmin` = $id";
-
-        return $this->dbConn->query($queryStr);
-    }
-
-    public function editPeserta(int $id, string $nama, string $alamat, string $noic, string $telefon)
-    {
-        if (!$this->checkValidString(func_get_args()))
-            return false;
-
-        $queryStr = "UPDATE `PESERTA` SET `namaPeserta` = '$nama', `telefonPeserta` = '$telefon', `noicPeserta` = '$noic', `alamatPeserta` = '$alamat'
-                     WHERE `PESERTA`.`idPeserta` = $id";
-
-        return $this->dbConn->query($queryStr);
     }
 
     public function createPengguna(int $peranan, string $emel, string $kataLaluan)
@@ -459,6 +540,53 @@ class dbManager
             $queryUpdate = "UPDATE `PESERTA` SET idMarkah = LAST_INSERT_ID() WHERE namaPeserta = '$namaPeserta'";
             return ($this->dbConn->query($queryUpdate)) ? true : false;
         }*/
+    }
+
+    public function editPengguna(int $id, string $emel, string $kataLaluan = null)
+    {
+        if (!$this->checkValidString(func_get_args()))
+            return false;
+
+        $editKataLaluan = "";
+        if ($kataLaluan != null) {
+            $this->hashPassword($kataLaluan);
+            $editKataLaluan = ", `kataLaluanPengguna` = '$kataLaluan'";
+        }
+        $queryStr = "UPDATE `PENGGUNA` SET `emelPengguna` = '$emel'$editKataLaluan WHERE `PENGGUNA`.`idPengguna` = $id";
+
+        return $this->dbConn->query($queryStr);
+    }
+
+    public function editHakim(int $id, string $nama)
+    {
+
+        if (!$this->checkValidString(func_get_args()))
+            return false;
+
+        $queryStr = "UPDATE `HAKIM` SET `namaHakim` = '$nama' WHERE `HAKIM`.`idHakim` = $id";
+
+        return $this->dbConn->query($queryStr);
+    }
+
+    public function editAdmin(int $id, string $nama)
+    {
+        if (!$this->checkValidString(func_get_args()))
+            return false;
+
+        $queryStr = "UPDATE `ADMIN` SET `namaAdmin` = '$nama' WHERE `ADMIN`.`idAdmin` = $id";
+
+        return $this->dbConn->query($queryStr);
+    }
+
+    public function editPeserta(int $id, string $nama, string $alamat, string $noic, string $telefon)
+    {
+        if (!$this->checkValidString(func_get_args()))
+            return false;
+
+        $queryStr = "UPDATE `PESERTA` SET `namaPeserta` = '$nama', `telefonPeserta` = '$telefon', `noicPeserta` = '$noic', `alamatPeserta` = '$alamat'
+                     WHERE `PESERTA`.`idPeserta` = $id";
+
+        return $this->dbConn->query($queryStr);
     }
 
     /**

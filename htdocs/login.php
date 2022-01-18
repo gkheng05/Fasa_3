@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST" && $_POST["username"] && $_POST["passw
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-4">
-                    <? echo ($showWrongPasswd) ? "<div class=\"alert alert-danger\" role=\"alert\"> Salah Kata Laluan </div>" : "" ?>
+                    <?php echo (($showWrongPasswd) ? "<div class=\"alert alert-danger\" role=\"alert\"> Salah Kata Laluan </div>" : ""); ?>
                     <div class="card-group d-block d-md-flex row">
                         <div class="card col-md-7 p-4 mb-0">
                             <form class="card-body" action="/login.php" method="POST">

@@ -5,7 +5,7 @@
         redirect("login.php");
     }else{
         if ($_SERVER['REQUEST_METHOD'] === "POST" && $_POST["nama"] && $_POST["kataLaluan"]) {
-            $status = $dbManager->createHakim($_POST["nama"], $_POST["kataLaluan"]);
+            //$status = $dbManager->createHakim($_POST["nama"], $_POST["kataLaluan"]);
         }
     }
 ?>
@@ -40,18 +40,18 @@
                 <div class="row">
                     <div class="col">
                         <h1>Daftar Hakim</h1>
-                        <?
+                        <?php
                         if ($_SERVER['REQUEST_METHOD'] === "POST") {
                             if (!$status) {
                         ?>
                                 <div class="alert alert-danger" role="alert">
                                     Salah info hakim
                                 </div>
-                            <? } else { ?>
+                            <?php } else { ?>
                                 <div class="alert alert-success" role="alert">
                                     Sudah muat naik info hakim
                                 </div>
-                        <? }
+                        <?php }
                         } ?>
                         <form action="/daftarHakim.php" method="POST">
                             <div class="input-group col-5 my-4">

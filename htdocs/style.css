@@ -1,4 +1,4 @@
-body {
+/*body {
     position: relative;
     overflow-x: hidden;
     background-color: #CFD8DC;
@@ -7,18 +7,18 @@ body {
 body,
 html {
     height: 100%;
-}
-
+}*/
+/*
 .nav .open>a,
 .nav .open>a:hover,
 .nav .open>a:focus {
     background-color: transparent;
 }
-
+*/
 /*-------------------------------*/
 /*           Wrappers            */
 /*-------------------------------*/
-
+/*
 #wrapper {
     padding-left: 0;
     -webkit-transition: all 0.5s ease;
@@ -63,10 +63,11 @@ html {
     position: absolute;
     margin-right: -220px;
 }
-
+*/
 /*-------------------------------*/
 /*     Sidebar nav styles        */
 /*-------------------------------*/
+/*
 .navbar {
     padding: 0;
 }
@@ -185,7 +186,7 @@ html {
 .dropdown-menu.show {
     top: 0;
 }
-
+*/
 /*Fontawesome icons*/
 /*
 .nav.sidebar-nav li a::before {
@@ -256,7 +257,7 @@ a[href*="#followme"]::before {
 /*-------------------------------*/
 /*       Hamburger-Cross         */
 /*-------------------------------*/
-
+/*
 .hamburger {
     position: fixed;
     top: 20px;
@@ -383,7 +384,7 @@ a[href*="#followme"]::before {
     -webkit-transform: translate3d(-100px, 0, 0);
     -webkit-transition: all .35s ease-in-out;
 }
-
+*/
 /*-------------------------------*/
 /*            Overlay            */
 /*-------------------------------*/

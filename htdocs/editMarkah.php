@@ -39,18 +39,18 @@ if (!$dbManager->isHakim()) {
                 <div class="row">
                     <div class="col">
                         <h1>Edit Markah</h1>
-                        <?
+                        <?php
                         if ($_SERVER['REQUEST_METHOD'] === "POST") {
                             if (!$status) {
                         ?>
                                 <div class="alert alert-danger" role="alert">
                                     Salah info markah
                                 </div>
-                            <? } else { ?>
+                            <?php } else { ?>
                                 <div class="alert alert-success" role="alert">
                                     Sudah muat naik info markah
                                 </div>
-                        <? }
+                        <?php }
                         } ?>
                         <form action="/editMarkah.php" method="POST">
                             <div class="input-group col-5 my-4">

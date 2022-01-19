@@ -103,7 +103,7 @@ if ($dbManager->checkLoggedIn()) {
                             </div>
                         </div>
                     </form>
-
+                    <?php if($dbManager->isAdmin()) { ?>
                     <div class="row align-content-center justify-content-end mx-auto my-2">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="Menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Menu
@@ -124,6 +124,7 @@ if ($dbManager->checkLoggedIn()) {
                             </form>
                         </div>
                     </div>
+                    <?php } ?>
 
                     <table class="table table-hover table-striped">
                         <thead class="thead-dark">

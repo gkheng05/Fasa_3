@@ -268,6 +268,20 @@ if ($dbManager->isAdmin()) {
                         </div>
                     </form>
 
+                    <div class="row align-content-center justify-content-end mx-auto my-2">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="Menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Menu
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="Menu">
+                            <a class="dropdown-item" data-toggle="modal" data-target="#importExportDataModal">
+                                Import / Eksport
+                            </a>
+                            <a class="dropdown-item" onclick="showForm(true, '1')">
+                                Daftar Pengguna Baharu
+                            </a>
+                        </div>
+                    </div>
+
                     <table class="table table-hover table-striped">
                         <thead class="thead-dark">
                             <tr>
@@ -310,10 +324,6 @@ if ($dbManager->isAdmin()) {
                             <?php } ?>
                         </tbody>
                     </table>
-                    <div class="row justify-content-between mr-auto ml-auto">
-                        <button type="button" class="btn btn-outline-secondary" onclick="showForm(true, '1')">Daftar Pengguna Baru</button>
-                        <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#importExportDataModal">Import/Eksport Data</button>
-                    </div>
                 </div>
             </div>
         </div>

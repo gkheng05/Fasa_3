@@ -175,6 +175,13 @@ class dbManager
         return $result->fetch_array();
     }
 
+
+    public function getMarkahPurata(){
+        if($result = $this->dbConn->query("SELECT avg(markahBhgA) / 20 * 100 as a, avg(markahBhgB) / 30 * 100 as b, avg(markahBhgC) / 50 * 100 as c, avg(jumlahMarkah) FROM markah"))
+            return $result->fetch_array();
+        return false;
+    }
+
     /**
      * get current user name
      * 
@@ -270,28 +277,42 @@ class dbManager
         }
     }
 
-    public function importMarkah()
+    public function importMarkah(string $fileName)
     {
-        $csv = "id,bahagian A,bahagian B,bahagian C,jumlah Markah\n";
-        $allRes = $this->getAllTempatPeserta();
+        $file = fopen($fileName, "r");
+        while (($data = fgetcsv($file, 0)) !== false) {
+            if (!empty($data[0]) && !empty($data[1]))
+                $result[] = $data;
+        }
+        fclose($file);
+        if (!isset($result) || $result[0] != array("id", "nama", "bahagian A", "bahagian B", "bahagian C") || count($result) <= 1) 
+            return false;
+        
+        array_shift($result);
 
-        foreach ($allRes as $res)
-            $csv .= $res["id"] . "," . $res["a"] . "," . $res["b"] . "," . $res["c"] . "," . $res["jumlah"] . "\n";
+        foreach ($result as $res)
+            $allMarkah[] = "(" . $res[0] . ", " . $res[2] . ", " . $res[3] . ", " . $res[4] . ")";
+        $flatten = implode(", ", $allMarkah);
+        $queryStr = "INSERT INTO `markah`(`idMarkah`, `markahBhgA`, `markahBhgB`, `markahBhgC`) VALUES $flatten 
+                    ON DUPLICATE KEY UPDATE `markahBhgA`=VALUES(markahBhgA), `markahBhgB`=VALUES(markahBhgB), `markahBhgC`=VALUES(markahBhgC);";
 
-        return $csv;
+        try {
+            $this->dbConn->query($queryStr);
+        } catch (Exception $e) {
+            echo var_dump($e);
+            return false;
+        }
+        return true;
     }
 
     public function exportMarkah()
     {
         //$file = fopen("php://temp","rw+");
         $file = fopen("php://output", "rw+");
-        fputcsv($file, array("tempat peserta", "nama peserta", "bahagian A", "bahagian B", "bahagian C", "jumlah Markah"));
+        fputcsv($file, array("id", "nama", "bahagian A", "bahagian B", "bahagian C"));
         $allRes = $this->getAllTempatPeserta();
-        $tempat = 1;
-        foreach ($allRes as $res) {
-            fputcsv($file, array($tempat, $res["nama"], $res["a"], $res["b"], $res["c"], $res["jumlah"]));
-            $tempat++;
-        }
+        foreach ($allRes as $res)
+            fputcsv($file, array($res["id"], $res["nama"], $res["a"], $res["b"], $res["c"]));
 
         fclose($file);
         /*
@@ -334,26 +355,14 @@ class dbManager
         }
         fclose($file);
 
-        if ($peranan !== 1 && $peranan !== 2 && $peranan !== 6) {
+        if ($peranan !== 1 && $peranan !== 2 && $peranan !== 6)
             return false;
-        }
 
-        if (!isset($result)) {
-            //echo "error fgetcsv";
+        if (!isset($result) || $result[0] != array("nama", "emel", "kata laluan") || count($result) <= 1)
             return false;
-        }
-
-        if (!($result[0][0] == "nama" && $result[0][1] == "emel" && $result[0][2] == "kata laluan")) {
-            //echo var_dump($result[0]);
-            //echo "error csv";
-            return false;
-        }
 
         array_shift($result);
 
-        if (empty($result)) {
-            return false;
-        }
         try {
 
             $this->dbConn->begin_transaction();
@@ -376,7 +385,7 @@ class dbManager
                     $allIDMarkah[] = "($minID)";
                 }
 
-                $this->dbConn->query("INSERT INTO `markah`(`idMarkah`) VALUES ". implode(", ", $allIDMarkah));
+                $this->dbConn->query("INSERT INTO `markah`(`idMarkah`) VALUES " . implode(", ", $allIDMarkah));
 
                 $flatten = implode(", ", $allPeserta);
                 $queryStr = "INSERT INTO `peserta`(`idPeserta`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES $flatten";

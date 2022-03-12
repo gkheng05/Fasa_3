@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 19, 2022 at 03:29 PM
+-- Generation Time: Mar 12, 2022 at 11:29 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.1
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `webapp`
 --
+CREATE DATABASE IF NOT EXISTS `webapp` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `webapp`;
 
 -- --------------------------------------------------------
 
@@ -31,6 +33,12 @@ CREATE TABLE `admin` (
   `idAdmin` int(11) NOT NULL,
   `namaAdmin` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- RELATIONSHIPS FOR TABLE `admin`:
+--   `idAdmin`
+--       `pengguna` -> `idPengguna`
+--
 
 --
 -- Dumping data for table `admin`
@@ -82,6 +90,12 @@ CREATE TABLE `hakim` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- RELATIONSHIPS FOR TABLE `hakim`:
+--   `idHakim`
+--       `pengguna` -> `idPengguna`
+--
+
+--
 -- Dumping data for table `hakim`
 --
 
@@ -106,6 +120,12 @@ CREATE TABLE `markah` (
   `markahBhgC` int(11) NOT NULL DEFAULT 0,
   `jumlahMarkah` int(11) GENERATED ALWAYS AS (`markahBhgA` + `markahBhgB` + `markahBhgC`) VIRTUAL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- RELATIONSHIPS FOR TABLE `markah`:
+--   `idMarkah`
+--       `pengguna` -> `idPengguna`
+--
 
 --
 -- Dumping data for table `markah`
@@ -136,6 +156,10 @@ CREATE TABLE `pengguna` (
   `kataLaluanPengguna` varchar(64) NOT NULL,
   `perananPengguna` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- RELATIONSHIPS FOR TABLE `pengguna`:
+--
 
 --
 -- Dumping data for table `pengguna`
@@ -174,6 +198,12 @@ CREATE TABLE `peserta` (
   `noicPeserta` varchar(12) NOT NULL,
   `alamatPeserta` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- RELATIONSHIPS FOR TABLE `peserta`:
+--   `idPeserta`
+--       `pengguna` -> `idPengguna`
+--
 
 --
 -- Dumping data for table `peserta`

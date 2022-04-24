@@ -1,11 +1,87 @@
 <?php
 require_once("lib/dbManager.php");
+require_once("lib/components.php");
 $dbManager->init();
 
 if ($dbManager->isAdmin()) {
     //echo var_dump($dbManager->isPeserta());
     //one action at once
     $export = false;
+    $status = null;
+    $message = null;
+
+
+    if (isset($_POST["action"]))
+        switch ($_POST["action"]) {
+            case "search": {
+
+                    break;
+                }
+            case "daftar": {
+                    $res = handleDaftarPenggunaRequest(6);
+                    $message = $res["message"];
+                    $status = $res["status"];
+
+                    break;
+                }
+            case "delete": {
+                    if (isset($_POST["deletePengguna"])) {
+                        try {
+                            $status = $dbManager->deletePengguna($_POST["deletePengguna"]);
+                        } catch (Exception $e) {
+                            $status = false;
+                        }
+                        $message = ($status) ? "Berjaya menghapuskan pengguna ini" : "Tidak boleh menghapuskan pengguna";
+                    }
+                    break;
+                }
+            case "import/export": {
+                    if (
+                        isset($_POST["jenisData"], $_POST["importExport"])
+                        && ($_POST["jenisData"] === "peserta" || $_POST["jenisData"] === "hakim" || $_POST["jenisData"] === "admin")
+                    ) {
+                        if ($_POST["importExport"] == "export") {
+                            $export = true;
+
+                            header("Content-disposition: attachment; filename=" . $_POST["jenisData"] . ".csv");
+                            header("Content-Type: text/csv");
+
+                            switch ($_POST["jenisData"]) {
+                                case "peserta":
+                                    $dbManager->exportPeserta();
+                                    break;
+                                case "hakim":
+                                    $dbManager->exportHakimAtauAdmin(false);
+                                    break;
+                                case "admin":
+                                    $dbManager->exportHakimAtauAdmin(true);
+                                    break;
+                            }
+                        }
+                        if ($_POST["importExport"] == "import") {
+                            switch ($_POST["jenisData"]) {
+                                case "peserta":
+                                    $status = $dbManager->importByCSV($_FILES["exportFileUpload"]['tmp_name'], 1);
+                                    break;
+                                case "hakim":
+                                    $status = $dbManager->importByCSV($_FILES["exportFileUpload"]['tmp_name'], 2);
+                                    break;
+                                case "admin":
+                                    $status = $dbManager->importByCSV($_FILES["exportFileUpload"]['tmp_name'], 6);
+                                    break;
+                            }
+                            $message = (($status) ? "Berjaya muat naik csv " : "Salah info csv ") . $_POST["jenisData"];
+                        }
+                    }
+                    break;
+                }
+        }
+    if (isset($_POST["cariNamaPengguna"]) || isset($_POST["cariPerananPengguna"]))
+        $dataSet = $dbManager->searchBy($_POST["cariNamaPengguna"], $_POST["cariPerananPengguna"]);
+    else
+        $dataSet = $dbManager->getAllUsers();
+
+    /*
     if (isset($_POST["deletePengguna"])) {
         try {
             $status = $dbManager->deletePengguna($_POST["deletePengguna"]);
@@ -50,14 +126,14 @@ if ($dbManager->isAdmin()) {
         }
 
         $message = ($status) ? "Berjaya membuat pengguna baharu" : "Tidak boleh membuat pengguna baharu";
-    } else if (isset($_POST["jenisData"], $_POST["importExport"]) && ($_POST["jenisData"] === "peserta" || $_POST["jenisData"] === "hakim" || $_POST["jenisData"] === "admin")){
-        if($_POST["importExport"] == "export"){
+    } else if (isset($_POST["jenisData"], $_POST["importExport"]) && ($_POST["jenisData"] === "peserta" || $_POST["jenisData"] === "hakim" || $_POST["jenisData"] === "admin")) {
+        if ($_POST["importExport"] == "export") {
             $export = true;
 
-            header("Content-disposition: attachment; filename=". $_POST["jenisData"] .".csv");
+            header("Content-disposition: attachment; filename=" . $_POST["jenisData"] . ".csv");
             header("Content-Type: text/csv");
 
-            switch($_POST["jenisData"]){
+            switch ($_POST["jenisData"]) {
                 case "peserta":
                     $dbManager->exportPeserta();
                     break;
@@ -69,8 +145,8 @@ if ($dbManager->isAdmin()) {
                     break;
             }
         }
-        if($_POST["importExport"] == "import"){
-            switch($_POST["jenisData"]){
+        if ($_POST["importExport"] == "import") {
+            switch ($_POST["jenisData"]) {
                 case "peserta":
                     $status = $dbManager->importByCSV($_FILES["exportFileUpload"]['tmp_name'], 1);
                     break;
@@ -90,6 +166,7 @@ if ($dbManager->isAdmin()) {
     } else {
         $dataSet = $dbManager->getAllUsers();
     }
+    */
 } else {
     redirect("login.php");
 }
@@ -102,6 +179,7 @@ if ($dbManager->isAdmin()) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/7cd63795dc.js" crossorigin="anonymous"></script>
+
 
         <title>Pengurusan Pengguna</title>
 
@@ -118,70 +196,14 @@ if ($dbManager->isAdmin()) {
         <?php require("lib/navBar.php"); ?>
 
         <div class="container my-5">
+            <!-- create/update user -->
             <form action="/pengguna.php" method="POST">
-                <div class="modal fade" id="daftarPengguna" tabindex="1" role="dialog">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Pengguna</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <div id="formDaftarPengguna">
-                                    <div class="form-row">
-                                        <div class="form-group col-md-6">
-                                            <label for="emelPengguna">Emel</label>
-                                            <input type="email" class="form-control" id="emelPengguna" name="emelPengguna" placeholder="abc@gmail.com" required>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label for="kataLaluanPengguna">Kata Laluan</label>
-                                            <input type="password" class="form-control" id="kataLaluanPengguna" name="kataLaluanPengguna" placeholder="Kata Laluan">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="namaPengguna">Nama</label>
-                                        <input type="text" class="form-control" id="namaPengguna" name="namaPengguna" placeholder="Ali" required>
-                                    </div>
-                                    <div id="infoPeserta">
-                                        <div class="form-group">
-                                            <label for="alamatPeserta">Alamat</label>
-                                            <input type="text" class="form-control" id="alamatPeserta" name="alamatPeserta" placeholder="5, Jalan Rambutan, Tanjong Bungah, 11200" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="telefonPeserta">Telefon</label>
-                                            <input type="tel" class="form-control" id="telefonPeserta" name="telefonPeserta" placeholder="0123456789" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="icPeserta">NRIC</label>
-                                            <input type="text" class="form-control" id="icPeserta" name="icPeserta" placeholder="050101070999" required>
-                                        </div>
-                                    </div>
-                                    <div id="pilihanPeranan" class="form-group">
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="perananPengguna" id="pilihanPeserta" value=1 checked>
-                                            <label class="form-check-label" for="pilihanPeserta">Peserta</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="perananPengguna" id="pilihanHakim" value=2>
-                                            <label class="form-check-label" for="pilihanHakim">Hakim</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="perananPengguna" id="pilihanAdmin" value=6>
-                                            <label class="form-check-label" for="pilihanAdmin">Admin</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button id="btnDaftarPengguna" type="submit" class="btn btn-primary">Daftar</button>
-                            </div>
-                            <input type="hidden" id="idPengguna" name="idPengguna">
-                        </div>
-                    </div>
-                </div>
+                <?= createDaftarModal() ?>
+                <input type="hidden" name="action" value="daftar" />
             </form>
+
+
+            <!-- import/export data -->
             <form action="/pengguna.php" method="POST" enctype="multipart/form-data">
                 <div class="modal fade" id="importExportDataModal" tabindex="1" role="dialog">
                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -237,14 +259,13 @@ if ($dbManager->isAdmin()) {
                         </div>
                     </div>
                 </div>
+                <input type="hidden" name="action" value="import/export" />
             </form>
+
             <div class="row">
                 <div class="col">
-                    <?php if (isset($status)) { ?>
-                        <div class="alert <?= ($status) ? "alert-success" : "alert-danger" ?>" role="alert">
-                            <?= $message ?>
-                        </div>
-                    <?php } ?>
+
+                    <?= displayMessage($message, $status) ?>
 
                     <form class="row justify-content-between align-content-center my-3" action="/pengguna.php" method="POST">
                         <div class="col-4 mx-3">
@@ -266,6 +287,8 @@ if ($dbManager->isAdmin()) {
                                 <button class="btn btn-outline-secondary" type="submit">Cari</button>
                             </div>
                         </div>
+
+                        <input type="hidden" name="action" value="search" />
                     </form>
 
                     <div class="row align-content-center justify-content-end mx-auto my-2">
@@ -313,11 +336,26 @@ if ($dbManager->isAdmin()) {
                                                 <button class="btn btn-secondary" type="button" onclick="showForm(false, '<?= implode('\',\'', $args) ?>')">
                                                     <i class="fa fa fa-pencil fa-lg" aria-hidden="true"></i>
                                                 </button>
-                                                <button class="btn btn-secondary" type="submit">
+
+                                                <button class="btn btn-secondary" 
+                                                data-toggle="confirmation" 
+                                                data-singleton="true" 
+                                                data-popout="true" 
+                                                data-title="Penghapusan Pengguna"
+                                                data-content="Adakah anda pasti?"
+                                                data-btn-ok-label="Ya"
+                                                data-btn-ok-class="btn btn-danger"
+                                                data-btn-cancel-label="Tidak"
+                                                data-btn-cancel-class="btn btn-secondary"
+                                                onclick="$(this).confirmation('toggle');">
                                                     <i class="fa fa-trash-o fa-lg" aria-hidden="true"></i>
                                                 </button>
+
+
                                                 <input type="hidden" name="deletePengguna" value="<?= $row["id"] ?>" />
+                                                <input type="hidden" name="action" value="delete" />
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -332,8 +370,16 @@ if ($dbManager->isAdmin()) {
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-confirmation2/dist/bootstrap-confirmation.min.js"></script>
         <script>
-            $('#exportFileUpload').change(function(){
+            $("[data-toggle=confirmation]").confirmation({
+                rootSelector: '[data-toggle=confirmation]',
+                onConfirm: function(value) {
+                    console.log(value);
+                }
+            });
+
+            $('#exportFileUpload').change(function() {
                 //get the file name
                 var fileName = $(this).val().split(/(\\|\/)/g).pop();
                 //replace the "Choose a file" label
@@ -353,7 +399,7 @@ if ($dbManager->isAdmin()) {
             });
 
             $('input[name="importExport"]').change(function() {
-                if(this.value == "export")
+                if (this.value == "export")
                     $("#exportFileUploadDiv").addClass("disabledbutton");
                 else
                     $("#exportFileUploadDiv").removeClass("disabledbutton");

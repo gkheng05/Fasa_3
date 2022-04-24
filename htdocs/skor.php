@@ -22,6 +22,7 @@ if ($dbManager->checkLoggedIn()) {
 
                 $dbManager->exportMarkah();
                 break;
+
             case "import":
                 $status = $dbManager->importMarkah($_FILES["importExportFile"]["tmp_name"]);
                 $message = ($status) ? "Berjaya import fail CSV" : "Salah info fail CSV";
@@ -43,7 +44,12 @@ if ($dbManager->checkLoggedIn()) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/7cd63795dc.js" crossorigin="anonymous"></script>
-
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous">
+        </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous">
+        </script>
         <title>Skor Peserta</title>
     </head>
 
@@ -103,27 +109,30 @@ if ($dbManager->checkLoggedIn()) {
                             </div>
                         </div>
                     </form>
-                    <?php if($dbManager->isAdmin()) { ?>
-                    <div class="row align-content-center justify-content-end mx-auto my-2">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="Menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Menu
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="Menu">
-                            <a class="dropdown-item" onclick="importExport(true)">
-                                Eksport Markah
-                            </a>
-                            <a class="dropdown-item" onclick="(function(e) {
-                                e.preventDefault();
-                                $('#importExportFile').click();
-                            })(event)">
-                                Import Markah
-                            </a>
-                            <form id="importExportForm" action="/skor.php" method="POST" enctype="multipart/form-data">
-                                <input id="importExportFile" type="file" style="display: none;" name="importExportFile" />
-                                <input type="hidden" name="importExport" id="importExport">
-                            </form>
+                    <?php if ($dbManager->isAdmin()) { ?>
+                        <div class="row align-content-center justify-content-end mx-auto my-2">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="Menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Menu
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="Menu">
+                                <a class="dropdown-item" onclick="importExport(true)">
+                                    Eksport Markah
+                                </a>
+                                <a class="dropdown-item" onclick="(function(e) {
+                                    e.preventDefault();
+                                    $('#importExportFile').click();
+                                })(event)">
+                                    Import Markah
+                                </a>
+                                <a class="dropdown-item" onclick="cetak()">
+                                    Cetak
+                                </a>
+                                <form id="importExportForm" action="/skor.php" method="POST" enctype="multipart/form-data">
+                                    <input id="importExportFile" type="file" style="display: none;" name="importExportFile" />
+                                    <input type="hidden" name="importExport" id="importExport">
+                                </form>
+                            </div>
                         </div>
-                    </div>
                     <?php } ?>
 
                     <table class="table table-hover table-striped">
@@ -136,7 +145,7 @@ if ($dbManager->checkLoggedIn()) {
                                 <th scope="col">Bahagian C</th>
                                 <th scope="col">Jumlah Markah</th>
                                 <?php if ($dbManager->isAdmin() || $dbManager->isHakim()) { ?>
-                                    <th scope="col"></th>
+                                    <th class="editMarkahFunction" scope="col"></th>
                                 <?php } ?>
                             </tr>
                         </thead>
@@ -153,7 +162,7 @@ if ($dbManager->checkLoggedIn()) {
                                     <td><?= $row["c"] ?></td>
                                     <td><?= $row["jumlah"] ?></td>
                                     <?php if ($dbManager->isAdmin() || $dbManager->isHakim()) { ?>
-                                        <td>
+                                        <td class="editMarkahFunction">
                                             <div class="row justify-content-around">
                                                 <?php if ($dbManager->isHakim()) {
                                                     $allValues = array($row['id'], $row['a'], $row['b'], $row['c']);
@@ -181,10 +190,9 @@ if ($dbManager->checkLoggedIn()) {
                 </div>
             </div>
         </div>
+                                
 
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        
         <script>
             function editMarkah(id, a, b, c) {
                 $("#idPeserta").val(id);
@@ -202,6 +210,21 @@ if ($dbManager->checkLoggedIn()) {
             function importExport(isExport) {
                 $('#importExport').val(((isExport == true) ? "export" : "import"));
                 $('#importExportForm').submit();
+            }
+
+            function cetak() {
+                var cetak = window.open();
+                var table = $("table").clone();
+                table.find(".editMarkahFunction").remove();
+
+                cetak.document.write("<html><head>");
+                cetak.document.write($("head")[0].innerHTML);
+                
+                cetak.document.write("</head><body>");
+                cetak.document.write("<h4 class='mb-5'>Skor Peserta</h4>")
+                cetak.document.write(table[0].outerHTML);
+                cetak.document.write("<script> print(); close(); <\/script>")
+                cetak.document.write("</body></html>");
             }
         </script>
     </body>

@@ -173,12 +173,14 @@ if ($dbManager->checkLoggedIn()) {
                                                 <?php } ?>
 
                                                 <?php if ($dbManager->isAdmin()) { ?>
+                                                    <!--
                                                     <form action="/skor.php" method="POST">
                                                         <button class="btn btn-secondary" type="submit">
                                                             <span class="fa fa-trash-o fa-lg" aria-hidden="true"></span>
                                                         </button>
                                                         <input type="hidden" name="deletePeserta" value="<?= $row[0] ?>" />
                                                     </form>
+                                                    -->
                                                 <?php } ?>
                                             </div>
                                         </td>
@@ -190,9 +192,9 @@ if ($dbManager->checkLoggedIn()) {
                 </div>
             </div>
         </div>
-                                
 
-        
+
+
         <script>
             function editMarkah(id, a, b, c) {
                 $("#idPeserta").val(id);
@@ -219,7 +221,7 @@ if ($dbManager->checkLoggedIn()) {
 
                 cetak.document.write("<html><head>");
                 cetak.document.write($("head")[0].innerHTML);
-                
+
                 cetak.document.write("</head><body>");
                 cetak.document.write("<h4 class='mb-5'>Skor Peserta</h4>")
                 cetak.document.write(table[0].outerHTML);

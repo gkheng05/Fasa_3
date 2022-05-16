@@ -176,10 +176,51 @@ class dbManager
     }
 
 
-    public function getMarkahPurata(){
-        if($result = $this->dbConn->query("SELECT avg(markahBhgA) / 20 * 100 as a, avg(markahBhgB) / 30 * 100 as b, avg(markahBhgC) / 50 * 100 as c, avg(jumlahMarkah) FROM markah"))
+    public function getMarkahPurata()
+    {
+        if ($result = $this->dbConn->query("SELECT avg(markahBhgA) / 20 * 100 as a, avg(markahBhgB) / 30 * 100 as b, avg(markahBhgC) / 50 * 100 as c, avg(jumlahMarkah) FROM markah"))
             return $result->fetch_array();
         return false;
+    }
+
+    public function getMarkahStatistik(string $bhg)
+    {
+        if (!$this->checkValidString(func_get_args()))
+            return false;
+
+        if (!$result = $this->dbConn->query("SELECT markahBhg$bhg AS markah, COUNT(idMarkah) AS count FROM markah GROUP BY markah ORDER BY markah ASC"))
+            return false;
+
+        while ($res = $result->fetch_array()) {
+            $label[] = $res["markah"];
+            $value[] = $res["count"];
+        }
+
+        if (!in_array(0, $label)) {
+            array_unshift($label, 0);
+            array_unshift($value, 0);
+        }
+
+        switch ($bhg) {
+            case "A":
+                $max = 20;
+                break;
+            case "B":
+                $max = 30;
+                break;
+            case "C":
+                $max = 50;
+                break;
+            default:
+                return false;
+        }
+
+        if(!in_array($max, $label)) {
+            array_push($label, $max);
+            array_push($value, 0);
+        }
+
+        return array("label" => $label, "value" => $value);
     }
 
     /**
@@ -285,16 +326,16 @@ class dbManager
                 $result[] = $data;
         }
         fclose($file);
-        if (!isset($result) || $result[0] != array("id", "nama", "bahagian A", "bahagian B", "bahagian C") || count($result) <= 1) 
+        if (!isset($result) || $result[0] != array("id", "nama", "bahagian A", "bahagian B", "bahagian C") || count($result) <= 1)
             return false;
-        
+
         array_shift($result);
 
         foreach ($result as $res)
             $allMarkah[] = "(" . $res[0] . ", " . $res[2] . ", " . $res[3] . ", " . $res[4] . ")";
         $flatten = implode(", ", $allMarkah);
-        $queryStr = "INSERT INTO `markah`(`idMarkah`, `markahBhgA`, `markahBhgB`, `markahBhgC`) VALUES $flatten 
-                    ON DUPLICATE KEY UPDATE `markahBhgA`=VALUES(markahBhgA), `markahBhgB`=VALUES(markahBhgB), `markahBhgC`=VALUES(markahBhgC);";
+        $queryStr = "INSERT INTO `markah`(`idPeserta`, `markahBhgA`, `markahBhgB`, `markahBhgC`) VALUES $flatten 
+                    ON DUPLICATE KEY UPDATE `markahBhgA` = VALUES(markahBhgA), `markahBhgB` = VALUES(markahBhgB), `markahBhgC` = VALUES(markahBhgC);";
 
         try {
             $this->dbConn->query($queryStr);
@@ -358,7 +399,7 @@ class dbManager
         if ($peranan !== 1 && $peranan !== 2 && $peranan !== 6)
             return false;
 
-        if (!isset($result) || $result[0] != array("nama", "emel", "kata laluan") || count($result) <= 1)
+        if (!isset($result) || !($result[0][0] == "nama" && $result[0][1] == "emel" && $result[0][2] == "kata laluan") || count($result) <= 1)
             return false;
 
         array_shift($result);
@@ -385,10 +426,10 @@ class dbManager
                     $allIDMarkah[] = "($minID)";
                 }
 
-                $this->dbConn->query("INSERT INTO `markah`(`idMarkah`) VALUES " . implode(", ", $allIDMarkah));
+                //$this->dbConn->query("INSERT INTO `markah`(`idMarkah`) VALUES " . implode(", ", $allIDMarkah));
 
                 $flatten = implode(", ", $allPeserta);
-                $queryStr = "INSERT INTO `peserta`(`idPeserta`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES $flatten";
+                $queryStr = "INSERT INTO `peserta`(`idPengguna`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES $flatten";
             } else if ($peranan == 2 || $peranan == 6) {
                 foreach ($result as $res) {
                     $minID++;
@@ -396,13 +437,17 @@ class dbManager
                 }
 
                 $flatten = implode(", ", $allPeserta);
-                $queryStr = (($peranan == 2) ? "INSERT INTO `HAKIM`(`idHakim`, `namaHakim`) VALUES " : "INSERT INTO `ADMIN`(`idAdmin`, `namaAdmin`) VALUES ") . $flatten;
+                $queryStr = (($peranan == 2) ? "INSERT INTO `HAKIM`(`idPengguna`, `namaHakim`) VALUES " : "INSERT INTO `ADMIN`(`idPengguna`, `namaAdmin`) VALUES ") . $flatten;
             }
 
             $this->dbConn->query($queryStr);
             $this->dbConn->commit();
         } catch (Exception $e) {
+            echo $e->getMessage();
+
             $this->dbConn->rollback();
+            exit();
+
             return false;
         }
         return true;
@@ -477,12 +522,22 @@ class dbManager
         if (!$this->checkValidString(func_get_args()))
             return false;
 
-        $id = $this->createPengguna(1, $emel, $kataLaluan);
-        $pesertaQuery = "INSERT INTO `PESERTA`(`idPeserta`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES ($id, '$namaPeserta', '$telefonPeserta', '$noicPeserta', '$alamatPeserta')";
-        $markahQuery = "INSERT INTO `MARKAH`(`idMarkah`) VALUES ($id)";
+        try {
+            $this->dbConn->begin_transaction();
+            $id = $this->createPengguna(1, $emel, $kataLaluan);
 
+            $this->dbConn->query("INSERT INTO `PESERTA`(`idPengguna`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES ($id, '$namaPeserta', '$telefonPeserta', '$noicPeserta', '$alamatPeserta')");
+
+            //$this->dbConn->query("INSERT INTO `MARKAH`(`idMarkah`) VALUES (" . $this->dbConn->insert_id . ")");
+
+            $this->dbConn->commit();
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            $this->dbConn->rollback();
+            return false;
+        }
         //echo $queryStr;
-        return ($this->dbConn->query($pesertaQuery) && $this->dbConn->query($markahQuery)) ? true : false;
+        return true;
     }
 
     /**
@@ -495,9 +550,20 @@ class dbManager
     {
         if (!$this->checkValidString(func_get_args()))
             return false;
-        $id = $this->createPengguna(2, $emel, $kataLaluan);
-        $queryStr = "INSERT INTO `HAKIM`(`idHakim`, `namaHakim`) VALUES ($id, '$namaHakim')";
-        return ($this->dbConn->query($queryStr)) ? true : false;
+
+        try {
+            $this->dbConn->begin_transaction();
+
+            $id = $this->createPengguna(2, $emel, $kataLaluan);
+            $this->dbConn->query("INSERT INTO `HAKIM`(`idPengguna`, `namaHakim`) VALUES ($id, '$namaHakim')");
+
+            $this->dbConn->commit();
+        } catch (Exception) {
+            $this->dbConn->rollback();
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -510,9 +576,20 @@ class dbManager
     {
         if (!$this->checkValidString(func_get_args()))
             return false;
-        $id = $this->createPengguna(6, $emel, $kataLaluan);
-        $queryStr = "INSERT INTO `ADMIN`(`idAdmin`, `namaAdmin`) VALUES ($id, '$namaAdmin')";
-        return ($this->dbConn->query($queryStr)) ? true : false;
+
+        try {
+            $this->dbConn->begin_transaction();
+
+            $id = $this->createPengguna(6, $emel, $kataLaluan);
+            $this->dbConn->query("INSERT INTO `ADMIN`(`idPengguna`, `namaAdmin`) VALUES ($id, '$namaAdmin')");
+
+            $this->dbConn->commit();
+        } catch (Exception) {
+            $this->dbConn->rollback();
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -526,13 +603,14 @@ class dbManager
         //if(!$this->checkValidString(func_get_args()))
         //    return false;
 
-        if ($this->dbConn->query("SELECT * FROM `MARKAH` WHERE idMarkah = $id")->num_rows == 0)
+        if ($this->dbConn->query("SELECT * FROM `MARKAH` WHERE idPeserta = $id")->num_rows == 0)
             return false;
 
         if ($markahBhgA > 20 || $markahBhgB > 30 || $markahBhgC > 50)
             return false;
 
-        $queryUpdate = "UPDATE `MARKAH` SET `markahBhgA` = $markahBhgA , `markahBhgB` = $markahBhgB , `markahBhgC` = $markahBhgC WHERE `MARKAH`.`idMarkah` = $id";
+        $queryUpdate = "UPDATE `MARKAH` SET `markahBhgA` = $markahBhgA , `markahBhgB` = $markahBhgB , `markahBhgC` = $markahBhgC WHERE `MARKAH`.`idPeserta` = $id";
+
         return ($this->dbConn->query($queryUpdate)) ? true : false;
         #$queryInsert = "INSERT INTO MARKAH(markahBhgA, markahBhgB, markahBhgC) VALUES (int $markahBhgA, int $markahBhgB, int $markahBhgC)  "
         /*$idMarkah = $this->dbConn->query("SELECT idMarkah FROM `PESERTA` WHERE namaPeserta = '$namaPeserta'")->fetch_array()[0];
@@ -572,7 +650,7 @@ class dbManager
         if (!$this->checkValidString(func_get_args()))
             return false;
 
-        $queryStr = "UPDATE `HAKIM` SET `namaHakim` = '$nama' WHERE `HAKIM`.`idHakim` = $id";
+        $queryStr = "UPDATE `HAKIM` SET `namaHakim` = '$nama' WHERE `HAKIM`.`idPengguna` = $id";
 
         return $this->dbConn->query($queryStr);
     }
@@ -582,7 +660,7 @@ class dbManager
         if (!$this->checkValidString(func_get_args()))
             return false;
 
-        $queryStr = "UPDATE `ADMIN` SET `namaAdmin` = '$nama' WHERE `ADMIN`.`idAdmin` = $id";
+        $queryStr = "UPDATE `ADMIN` SET `namaAdmin` = '$nama' WHERE `ADMIN`.`idPengguna` = $id";
 
         return $this->dbConn->query($queryStr);
     }
@@ -593,7 +671,7 @@ class dbManager
             return false;
 
         $queryStr = "UPDATE `PESERTA` SET `namaPeserta` = '$nama', `telefonPeserta` = '$telefon', `noicPeserta` = '$noic', `alamatPeserta` = '$alamat'
-                     WHERE `PESERTA`.`idPeserta` = $id";
+                     WHERE `PESERTA`.`idPengguna` = $id";
 
         return $this->dbConn->query($queryStr);
     }

@@ -1,325 +1,258 @@
--- phpMyAdmin SQL Dump
--- version 5.1.1
--- https://www.phpmyadmin.net/
+-- MariaDB dump 10.19  Distrib 10.4.24-MariaDB, for Win64 (AMD64)
 --
--- Host: 127.0.0.1
--- Generation Time: Mar 12, 2022 at 11:29 AM
--- Server version: 10.4.22-MariaDB
--- PHP Version: 8.1.1
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
+-- Host: localhost    Database: webapp
+-- ------------------------------------------------------
+-- Server version	10.4.24-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `webapp`
---
-CREATE DATABASE IF NOT EXISTS `webapp` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `webapp`;
-
--- --------------------------------------------------------
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `admin`
 --
 
+DROP TABLE IF EXISTS `admin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `admin` (
-  `idAdmin` int(11) NOT NULL,
-  `namaAdmin` varchar(200) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONSHIPS FOR TABLE `admin`:
---   `idAdmin`
---       `pengguna` -> `idPengguna`
---
+  `idAdmin` int(11) NOT NULL AUTO_INCREMENT,
+  `idPengguna` int(11) NOT NULL,
+  `namaAdmin` varchar(200) NOT NULL,
+  PRIMARY KEY (`idAdmin`),
+  KEY `admin_ibfk_1` (`idPengguna`),
+  CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`idPengguna`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `admin`
 --
 
-INSERT INTO `admin` (`idAdmin`, `namaAdmin`) VALUES
-(9, 'admin');
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `allpengguna`
--- (See below for the actual view)
---
-CREATE TABLE `allpengguna` (
-`id` int(11)
-,`nama` varchar(200)
-,`emel` varchar(200)
-,`peranan` int(11)
-,`telefonPeserta` varchar(12)
-,`noicPeserta` varchar(12)
-,`alamatPeserta` varchar(200)
-);
-
--- --------------------------------------------------------
+LOCK TABLES `admin` WRITE;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+INSERT INTO `admin` VALUES (1,1,'Admin');
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Stand-in structure for view `allpeserta`
--- (See below for the actual view)
+-- Temporary table structure for view `allpengguna`
 --
-CREATE TABLE `allpeserta` (
-`id` int(11)
-,`nama` varchar(200)
-,`a` int(11)
-,`b` int(11)
-,`c` int(11)
-,`jumlah` int(11)
-);
 
--- --------------------------------------------------------
+DROP TABLE IF EXISTS `allpengguna`;
+/*!50001 DROP VIEW IF EXISTS `allpengguna`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `allpengguna` (
+  `id` tinyint NOT NULL,
+  `nama` tinyint NOT NULL,
+  `emel` tinyint NOT NULL,
+  `kataLaluan` tinyint NOT NULL,
+  `peranan` tinyint NOT NULL,
+  `telefonPeserta` tinyint NOT NULL,
+  `noicPeserta` tinyint NOT NULL,
+  `alamatPeserta` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `allpeserta`
+--
+
+DROP TABLE IF EXISTS `allpeserta`;
+/*!50001 DROP VIEW IF EXISTS `allpeserta`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `allpeserta` (
+  `id` tinyint NOT NULL,
+  `nama` tinyint NOT NULL,
+  `a` tinyint NOT NULL,
+  `b` tinyint NOT NULL,
+  `c` tinyint NOT NULL,
+  `jumlah` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `hakim`
 --
 
+DROP TABLE IF EXISTS `hakim`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `hakim` (
-  `idHakim` int(11) NOT NULL,
-  `namaHakim` varchar(200) NOT NULL
+  `idHakim` int(11) NOT NULL AUTO_INCREMENT,
+  `idPengguna` int(11) NOT NULL,
+  `namaHakim` varchar(200) NOT NULL,
+  PRIMARY KEY (`idHakim`),
+  KEY `hakim_ibfk_1` (`idPengguna`),
+  CONSTRAINT `hakim_ibfk_1` FOREIGN KEY (`idPengguna`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONSHIPS FOR TABLE `hakim`:
---   `idHakim`
---       `pengguna` -> `idPengguna`
---
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `hakim`
 --
 
-INSERT INTO `hakim` (`idHakim`, `namaHakim`) VALUES
-(100, 'agi1'),
-(101, 'agi2'),
-(102, 'agi3'),
-(103, 'agi4'),
-(104, 'agi5'),
-(185, 'hakimm');
-
--- --------------------------------------------------------
+LOCK TABLES `hakim` WRITE;
+/*!40000 ALTER TABLE `hakim` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hakim` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `markah`
 --
 
+DROP TABLE IF EXISTS `markah`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `markah` (
-  `idMarkah` int(11) NOT NULL,
+  `idMarkah` int(11) NOT NULL AUTO_INCREMENT,
+  `idPeserta` int(11) NOT NULL,
   `markahBhgA` int(11) NOT NULL DEFAULT 0,
   `markahBhgB` int(11) NOT NULL DEFAULT 0,
   `markahBhgC` int(11) NOT NULL DEFAULT 0,
-  `jumlahMarkah` int(11) GENERATED ALWAYS AS (`markahBhgA` + `markahBhgB` + `markahBhgC`) VIRTUAL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONSHIPS FOR TABLE `markah`:
---   `idMarkah`
---       `pengguna` -> `idPengguna`
---
+  `jumlahMarkah` int(11) GENERATED ALWAYS AS (`markahBhgA` + `markahBhgB` + `markahBhgC`) VIRTUAL,
+  PRIMARY KEY (`idMarkah`),
+  KEY `markah_ibfk_1` (`idPeserta`),
+  CONSTRAINT `markah_ibfk_1` FOREIGN KEY (`idPeserta`) REFERENCES `peserta` (`idPeserta`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `markah`
 --
 
-INSERT INTO `markah` (`idMarkah`, `markahBhgA`, `markahBhgB`, `markahBhgC`) VALUES
-(175, 17, 28, 47),
-(176, 10, 21, 40),
-(177, 13, 24, 43),
-(178, 15, 26, 45),
-(179, 18, 29, 48),
-(180, 11, 22, 41),
-(181, 14, 25, 44),
-(182, 16, 27, 46),
-(183, 19, 30, 49),
-(184, 12, 23, 42),
-(186, 0, 0, 0);
-
--- --------------------------------------------------------
+LOCK TABLES `markah` WRITE;
+/*!40000 ALTER TABLE `markah` DISABLE KEYS */;
+INSERT INTO `markah` VALUES (1,1,2,5,6,13),(2,2,0,0,0,0),(3,3,0,0,0,0),(4,4,0,0,0,0),(5,5,0,0,0,0),(6,6,20,30,50,100),(7,7,20,30,50,100),(8,8,4,3,3,10),(9,9,2,3,4,9),(10,10,12,23,45,80),(11,11,10,10,10,30),(12,12,10,30,20,60),(13,13,0,0,0,0);
+/*!40000 ALTER TABLE `markah` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `pengguna`
 --
 
+DROP TABLE IF EXISTS `pengguna`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pengguna` (
-  `idPengguna` int(11) NOT NULL,
+  `idPengguna` int(11) NOT NULL AUTO_INCREMENT,
   `emelPengguna` varchar(200) NOT NULL,
   `kataLaluanPengguna` varchar(64) NOT NULL,
-  `perananPengguna` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONSHIPS FOR TABLE `pengguna`:
---
+  `perananPengguna` int(11) NOT NULL,
+  PRIMARY KEY (`idPengguna`),
+  UNIQUE KEY `emelPengguna` (`emelPengguna`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pengguna`
 --
 
-INSERT INTO `pengguna` (`idPengguna`, `emelPengguna`, `kataLaluanPengguna`, `perananPengguna`) VALUES
-(9, 'admin@testing.com', 'b822f1cd2dcfc685b47e83e3980289fd5d8e3ff3a82def24d7d1d68bb272eb32', 6),
-(100, 's@test.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae', 2),
-(101, 'gg2@hakim.com', 'a248d958573f5b710bfa762512f6bfb7f6e8aa7c42e69296f7e5843ef6ce197e', 2),
-(102, 'gg3@hakim.com', '0880de822d15f4cfecb4adaa4633092d7d2f7d33659969e9a8982a19623b3872', 2),
-(103, 'gg4@hakim.com', 'cafda4cb1eaf3fb0792a2e5f4cbd5cd29ce8ba4241a88d78054749e09f6ac20e', 2),
-(104, 'gg5@hakim.com', '9cc0a324b4075d5777afba213b6bf2d8648d098aa97ec5589b09937c54c528e9', 2),
-(175, 'dwad@gmail.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae', 1),
-(176, 'dwadw@gmail.com', 'a248d958573f5b710bfa762512f6bfb7f6e8aa7c42e69296f7e5843ef6ce197e', 1),
-(177, 'ae2aq@gmail.com', '0880de822d15f4cfecb4adaa4633092d7d2f7d33659969e9a8982a19623b3872', 1),
-(178, 'jaylen.leuschke@hotmail.com', 'cafda4cb1eaf3fb0792a2e5f4cbd5cd29ce8ba4241a88d78054749e09f6ac20e', 1),
-(179, 'jennie67@yahoo.com', '9cc0a324b4075d5777afba213b6bf2d8648d098aa97ec5589b09937c54c528e9', 1),
-(180, 'otho.schultz@hotmail.com', '3b47320028a4f635f0b6aa4f3aa7f8170b6a300c501acee3e54134fc0cc36f3b', 1),
-(181, 'paxton29@gmail.com', '8e3ddedf3f35ac6ce3b8551c9cf3209d439492f2bc7407c62152429117e6a659', 1),
-(182, 'darlene.schmeler@gmail.com', 'ad23ed9832d5432e03699647528aa511429c224959ff3c5f91bb0a0235ad5b8f', 1),
-(183, 'alexandria88@yahoo.com', '3a8cbeb1be65920447f0ed075e5e6e87eb15f6e1cfca74a9e1c480ab8ad4106e', 1),
-(184, 'trycia.block7@yahoo.com', '57792514b166b38d98abf658e2ef6d78a1a26f62cd1db340f3bd1f7e6bc78009', 1),
-(185, 'hakim@hakim.com', 'b822f1cd2dcfc685b47e83e3980289fd5d8e3ff3a82def24d7d1d68bb272eb32', 2),
-(186, 'peserta@p.com', 'b822f1cd2dcfc685b47e83e3980289fd5d8e3ff3a82def24d7d1d68bb272eb32', 1);
-
--- --------------------------------------------------------
+LOCK TABLES `pengguna` WRITE;
+/*!40000 ALTER TABLE `pengguna` DISABLE KEYS */;
+INSERT INTO `pengguna` VALUES (1,'admin@testing.com','b822f1cd2dcfc685b47e83e3980289fd5d8e3ff3a82def24d7d1d68bb272eb32',6),(2,'dwadw@gmail.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(3,'ae2aq@gmail.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(4,'jaylen.leuschke@hotmail.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(5,'jennie67@yahoo.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(6,'otho.schultz@hotmail.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(7,'paxton29@gmail.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(8,'darlene.schmeler@gmail.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(9,'alexandria88@yahoo.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(10,'trycia.block7@yahoo.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(11,'a@dw21.cokwad','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(12,'e1e12@ggg.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(13,'dwad21@fwa.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1),(14,'a@WEEEEEEEE.com','cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90',1);
+/*!40000 ALTER TABLE `pengguna` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `peserta`
 --
 
+DROP TABLE IF EXISTS `peserta`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `peserta` (
-  `idPeserta` int(11) NOT NULL,
+  `idPeserta` int(11) NOT NULL AUTO_INCREMENT,
+  `idPengguna` int(11) NOT NULL,
   `namaPeserta` varchar(200) NOT NULL,
   `telefonPeserta` varchar(12) NOT NULL,
   `noicPeserta` varchar(12) NOT NULL,
-  `alamatPeserta` varchar(200) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONSHIPS FOR TABLE `peserta`:
---   `idPeserta`
---       `pengguna` -> `idPengguna`
---
+  `alamatPeserta` varchar(200) NOT NULL,
+  PRIMARY KEY (`idPeserta`),
+  KEY `peserta_ibfk_1` (`idPengguna`),
+  CONSTRAINT `peserta_ibfk_1` FOREIGN KEY (`idPengguna`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `peserta`
 --
 
-INSERT INTO `peserta` (`idPeserta`, `namaPeserta`, `telefonPeserta`, `noicPeserta`, `alamatPeserta`) VALUES
-(175, 'a', 'b', 'b', 'a'),
-(176, 'b', 'aa', 'aa', 'aa'),
-(177, 'c', 'a', 'a', 'a'),
-(178, 'd', 'b', 'b', 'a'),
-(179, 'e', 'aa', 'aa', 'aa'),
-(180, 'f', 'a', 'a', 'a'),
-(181, 'g', 'b', 'b', 'a'),
-(182, 'h', 'aa', 'aa', 'aa'),
-(183, 'i', 'a', 'a', 'a'),
-(184, 'j', 'b', 'b', 'a'),
-(186, 'aaaa', 'a', 'a', 'a');
-
--- --------------------------------------------------------
-
---
--- Structure for view `allpengguna`
---
-DROP TABLE IF EXISTS `allpengguna`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `allpengguna`  AS SELECT `ap`.`id` AS `id`, `ap`.`nama` AS `nama`, `pengguna`.`emelPengguna` AS `emel`, `pengguna`.`perananPengguna` AS `peranan`, `ap`.`telefonPeserta` AS `telefonPeserta`, `ap`.`noicPeserta` AS `noicPeserta`, `ap`.`alamatPeserta` AS `alamatPeserta` FROM ((select `peserta`.`idPeserta` AS `id`,`peserta`.`namaPeserta` AS `nama`,`peserta`.`telefonPeserta` AS `telefonPeserta`,`peserta`.`noicPeserta` AS `noicPeserta`,`peserta`.`alamatPeserta` AS `alamatPeserta` from `peserta` union all select `hakim`.`idHakim` AS `id`,`hakim`.`namaHakim` AS `nama`,NULL AS `NULL`,NULL AS `NULL`,NULL AS `NULL` from `hakim` union all select `admin`.`idAdmin` AS `id`,`admin`.`namaAdmin` AS `nama`,NULL AS `NULL`,NULL AS `NULL`,NULL AS `NULL` from `admin`) `ap` join `pengguna` on(`pengguna`.`idPengguna` = `ap`.`id`)) ;
-
--- --------------------------------------------------------
+LOCK TABLES `peserta` WRITE;
+/*!40000 ALTER TABLE `peserta` DISABLE KEYS */;
+INSERT INTO `peserta` VALUES (1,2,'b','aa','aa','aa'),(2,3,'c','a','a','a'),(3,4,'d','b','b','a'),(4,5,'e','aa','aa','aa'),(5,6,'f','a','a','a'),(6,7,'g','b','b','a'),(7,8,'h','aa','aa','aa'),(8,9,'i','a','a','a'),(9,10,'j','b','b','a'),(10,11,'dwadwa','1','1','d'),(11,12,'admin@testing.com','dwad','adw','dwa'),(12,13,'admin@testing.com','dwa','dwwa','dwa'),(13,14,'1','1','2','a');
+/*!40000 ALTER TABLE `peserta` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `add markah` AFTER INSERT ON `peserta` FOR EACH ROW INSERT INTO markah (idPeserta) VALUES (NEW.idPeserta) */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Structure for view `allpeserta`
---
-DROP TABLE IF EXISTS `allpeserta`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `allpeserta`  AS SELECT `peserta`.`idPeserta` AS `id`, `peserta`.`namaPeserta` AS `nama`, `markah`.`markahBhgA` AS `a`, `markah`.`markahBhgB` AS `b`, `markah`.`markahBhgC` AS `c`, `markah`.`jumlahMarkah` AS `jumlah` FROM (`peserta` join `markah` on(`peserta`.`idPeserta` = `markah`.`idMarkah`)) ORDER BY `markah`.`jumlahMarkah` DESC ;
-
---
--- Indexes for dumped tables
+-- Final view structure for view `allpengguna`
 --
 
---
--- Indexes for table `admin`
---
-ALTER TABLE `admin`
-  ADD PRIMARY KEY (`idAdmin`);
+/*!50001 DROP TABLE IF EXISTS `allpengguna`*/;
+/*!50001 DROP VIEW IF EXISTS `allpengguna`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `allpengguna` AS select `ap`.`id` AS `id`,`ap`.`nama` AS `nama`,`webapp`.`pengguna`.`emelPengguna` AS `emel`,`webapp`.`pengguna`.`kataLaluanPengguna` AS `kataLaluan`,`webapp`.`pengguna`.`perananPengguna` AS `peranan`,`ap`.`telefonPeserta` AS `telefonPeserta`,`ap`.`noicPeserta` AS `noicPeserta`,`ap`.`alamatPeserta` AS `alamatPeserta` from ((select `webapp`.`peserta`.`idPengguna` AS `id`,`webapp`.`peserta`.`namaPeserta` AS `nama`,`webapp`.`peserta`.`telefonPeserta` AS `telefonPeserta`,`webapp`.`peserta`.`noicPeserta` AS `noicPeserta`,`webapp`.`peserta`.`alamatPeserta` AS `alamatPeserta` from `webapp`.`peserta` union all select `webapp`.`hakim`.`idPengguna` AS `id`,`webapp`.`hakim`.`namaHakim` AS `nama`,NULL AS `NULL`,NULL AS `NULL`,NULL AS `NULL` from `webapp`.`hakim` union all select `webapp`.`admin`.`idPengguna` AS `id`,`webapp`.`admin`.`namaAdmin` AS `nama`,NULL AS `NULL`,NULL AS `NULL`,NULL AS `NULL` from `webapp`.`admin`) `ap` join `webapp`.`pengguna` on(`webapp`.`pengguna`.`idPengguna` = `ap`.`id`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
--- Indexes for table `hakim`
---
-ALTER TABLE `hakim`
-  ADD PRIMARY KEY (`idHakim`);
-
---
--- Indexes for table `markah`
---
-ALTER TABLE `markah`
-  ADD PRIMARY KEY (`idMarkah`);
-
---
--- Indexes for table `pengguna`
---
-ALTER TABLE `pengguna`
-  ADD PRIMARY KEY (`idPengguna`),
-  ADD UNIQUE KEY `emelPengguna` (`emelPengguna`);
-
---
--- Indexes for table `peserta`
---
-ALTER TABLE `peserta`
-  ADD PRIMARY KEY (`idPeserta`);
-
---
--- AUTO_INCREMENT for dumped tables
+-- Final view structure for view `allpeserta`
 --
 
---
--- AUTO_INCREMENT for table `markah`
---
-ALTER TABLE `markah`
-  MODIFY `idMarkah` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=187;
+/*!50001 DROP TABLE IF EXISTS `allpeserta`*/;
+/*!50001 DROP VIEW IF EXISTS `allpeserta`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `allpeserta` AS select `peserta`.`idPeserta` AS `id`,`peserta`.`namaPeserta` AS `nama`,`markah`.`markahBhgA` AS `a`,`markah`.`markahBhgB` AS `b`,`markah`.`markahBhgC` AS `c`,`markah`.`jumlahMarkah` AS `jumlah` from (`peserta` join `markah` on(`peserta`.`idPeserta` = `markah`.`idPeserta`)) order by `markah`.`jumlahMarkah` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
---
--- AUTO_INCREMENT for table `pengguna`
---
-ALTER TABLE `pengguna`
-  MODIFY `idPengguna` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=187;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `admin`
---
-ALTER TABLE `admin`
-  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`idAdmin`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `hakim`
---
-ALTER TABLE `hakim`
-  ADD CONSTRAINT `hakim_ibfk_1` FOREIGN KEY (`idHakim`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `markah`
---
-ALTER TABLE `markah`
-  ADD CONSTRAINT `markah_ibfk_1` FOREIGN KEY (`idMarkah`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `peserta`
---
-ALTER TABLE `peserta`
-  ADD CONSTRAINT `peserta_ibfk_1` FOREIGN KEY (`idPeserta`) REFERENCES `pengguna` (`idPengguna`) ON DELETE CASCADE ON UPDATE CASCADE;
-COMMIT;
-
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2022-05-16 23:49:34

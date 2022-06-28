@@ -4,7 +4,8 @@ $dbManager->init();
 if (!$dbManager->checkLoggedIn())
     redirect("login.php");
 
-$dataSet = $dbManager->getMarkahPurata();
+$statistic = $dbManager->getMarkahPurata();
+$dataSet = $dbManager->getAllTempatPeserta(3);
 ?>
 <!DOCTYPE html>
 
@@ -12,12 +13,10 @@ $dataSet = $dbManager->getMarkahPurata();
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
-
-
     <title>Keputusan Sendiri</title>
 </head>
 
-<body style="background-color: #CFD8DC;">
+<body style="background-color: <?= $_SESSION["colour"] ?>;">
     <?php require "lib/navBar.php" ?>
     <div class="container my-5">
         <div class="row">
@@ -43,7 +42,7 @@ $dataSet = $dbManager->getMarkahPurata();
             </div>
         </div>
 
-        <div class="row">
+        <div class="row mb-4">
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
@@ -59,6 +58,47 @@ $dataSet = $dbManager->getMarkahPurata();
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-1">
+                <span style="font-size: 26px;">
+                    <i class="fas fa-ranking-star"></i>
+                </span>
+            </div>
+            <div class="col-1">
+                <h2>Pangkat</h2>
+            </div>
+        </div>
+
+        <div>
+            <table class="table table-hover table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Tempat Peserta</th>
+                        <th scope="col">Nama Peserta</th>
+                        <th scope="col">Bahagian A</th>
+                        <th scope="col">Bahagian B</th>
+                        <th scope="col">Bahagian C</th>
+                        <th scope="col">Jumlah Markah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($dataSet)
+                        foreach ($dataSet as $index => $row) {
+                    ?>
+                        <tr>
+                            <th scope="row"><?= $index + 1 ?></th>
+                            <td><?= $row["nama"] ?></td>
+                            <td><?= $row["a"] ?></td>
+                            <td><?= $row["b"] ?></td>
+                            <td><?= $row["c"] ?></td>
+                            <td><?= $row["jumlah"] ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -73,7 +113,7 @@ $dataSet = $dbManager->getMarkahPurata();
                 labels: ['Bahagian A', 'Bahagian B', 'Bahagian C', 'Jumlah Markah'],
                 datasets: [{
                     label: 'Markah Purata %',
-                    data: [<?= implode(",", $dataSet) ?>],
+                    data: [<?= implode(",", $statistic) ?>],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',

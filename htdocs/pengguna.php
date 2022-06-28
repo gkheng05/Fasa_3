@@ -191,7 +191,7 @@ if ($dbManager->isAdmin()) {
         </style>
     </head>
 
-    <body style="background-color: #CFD8DC;">
+    <body style="background-color: <?= $_SESSION["colour"] ?>;">
 
         <?php require("lib/navBar.php"); ?>
 

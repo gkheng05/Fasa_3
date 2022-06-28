@@ -102,11 +102,11 @@ function createDaftarModal(bool $pesertaOnly = false)
                             </div>
                             <div class="form-group">
                                 <label for="telefonPeserta">Telefon</label>
-                                <input type="tel" class="form-control" id="telefonPeserta" name="telefonPeserta" placeholder="0123456789" required>
+                                <input type="tel" class="form-control" id="telefonPeserta" name="telefonPeserta" placeholder="012-345-6789" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
                             </div>
                             <div class="form-group">
                                 <label for="icPeserta">NRIC</label>
-                                <input type="text" class="form-control" id="icPeserta" name="icPeserta" placeholder="050101070999" required>
+                                <input type="text" class="form-control" id="icPeserta" name="icPeserta" placeholder="050101070999" minlength="12" maxlength="12" required>
                             </div>
                         </div>
 

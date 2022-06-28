@@ -53,7 +53,7 @@ if ($dbManager->checkLoggedIn()) {
         <title>Skor Peserta</title>
     </head>
 
-    <body style="background-color: #CFD8DC;">
+    <body style="background-color: <?= $_SESSION["colour"] ?>;">
         <?php require "lib/navBar.php" ?>
 
         <div class="container my-5">

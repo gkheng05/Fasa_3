@@ -1,7 +1,11 @@
-<?php require_once("lib/dbManager.php"); ?>
+<?php
+require_once("lib/dbManager.php");
+if ($dbManager->checkLoggedIn() && isset($_POST["colour"]) && $_POST["colour"] == "true")
+    $dbManager->toggleChangeColour();
+?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Sistem Pengurusan Quiz BM</a>
+    <a class="navbar-brand" href="#">Sistem Pengurusan Kuiz BM</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -33,6 +37,11 @@
                     </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <form method="POST">
+                        <input type="hidden" name="colour" value="true" />
+                        <button type="submit" class="dropdown-item">Tukar Warna</button>
+                    </form>
+                    <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="/logout.php">Log Keluar</a>
                 </div>
             </li>

@@ -143,9 +143,11 @@ class dbManager
      * 
      * @return array 
      */
-    public function getAllTempatPeserta()
-    {
+    public function getAllTempatPeserta(int $limit = null)
+    {   
         $queryStr = "SELECT * FROM allPeserta";
+        if($limit)
+            $queryStr .= " LIMIT $limit";
 
         return $this->queryResultToArray($this->dbConn->query($queryStr));
     }
@@ -169,8 +171,8 @@ class dbManager
      */
     public function getMarkahPeserta()
     {
-        $queryStr = "SELECT markahBhgA, markahBhgB, markahBhgC, jumlahMarkah 
-                    FROM MARKAH WHERE idMarkah = '{$_SESSION["id"]}'";
+        $queryStr = "SELECT a, b, c, jumlah 
+                    FROM allPeserta WHERE idPengguna = '{$_SESSION["id"]}'";
         $result = $this->dbConn->query($queryStr);
         return $result->fetch_array();
     }
@@ -284,6 +286,7 @@ class dbManager
             $_SESSION["role"] = $data["perananPengguna"];
             $_SESSION["id"] = $data["idPengguna"];
             $_SESSION["nama"] = $data["nama"];
+            $_SESSION["colour"] = "#CFD8DC";
             return true;
         }/*
         //check if is Hakim
@@ -304,6 +307,14 @@ class dbManager
         }
         */
         return false;
+    }
+
+    public function toggleChangeColour() {
+        if($_SESSION["colour"] == "#85FC81")
+            $_SESSION["colour"] = "#CFD8DC";
+        else
+            $_SESSION["colour"] = "#85FC81";
+        redirect($_SERVER['REQUEST_URI']);
     }
 
     public function getPeranan(int $idPeranan)
@@ -727,4 +738,4 @@ class dbManager
     }
 }
 
-$dbManager = new dbManager("127.0.0.1", "admin", "4C4zjH_12)[/_zz_", "webapp");
+$dbManager = new dbManager("127.0.0.1", "root", "", "webapp");
